@@ -1,0 +1,21 @@
+﻿@{
+    ViewBag.Title = "Cards 101";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="header">
+    <h1>Cards 101</h1>
+</div>
+<div id="side">
+    Home<br />
+    @Html.ActionLink("Place an order", "Order", "User") <br />
+    @Html.ActionLink("Check your orders", "CheckOrders", "User") <br />
+    @Html.ActionLink("Edit your details", "EditDetails", "User")<br />
+    </div>
+<div id="main">
+    @using (Html.BeginForm("Logout", "User", FormMethod.Post))
+    {
+        @Html.Encode(Session["Message"]) <br />
+        <input type="submit" id="Logout" name="Logout" value="Log Out" />
+    }
+    @{ Html.EndForm(); }
+</div>

@@ -1,0 +1,222 @@
+﻿@{
+    ViewBag.Title = "Cards 101";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <script>
+        $(document).ready(function () {
+            var basket = [];
+            var description;
+            var price;
+            var numberOfItems = 0;
+            var combinedTotal;
+            $("#ItemToRemove").empty();
+            $("#NumberToRemove").empty();
+            $("#ItemToRemove").prop("disabled", true);
+            $("#NumberToRemove").prop("disabled", true);
+            $("#TotalLabel").prop("hidden", true);
+            function basketUpdate() {
+                $("#ItemToRemove").empty();
+                $("#Basket").empty();
+                $("#BasketHidden").empty();
+                combinedTotal = 0;
+                if (numberOfItems > 0) {
+                    $("#ItemToRemove").prop("disabled", false);
+                    $("#ItemToRemove").append("<option> </option>");
+                    $("#Basket").append("<tr><th>Image</th><th>Stock Code</th><th>Description</th><th>Quantity</th><th>Total Cost</th></tr>");
+                    for (var i = 0; i < numberOfItems; i++) {
+                        $("#Basket").append("<tr><th><img src='/Images/" + basket[i].Code + ".jpg' style='width: auto; height: 75px' /></th><th>" + basket[i].Code + "</th><th>" + basket[i].Description + "</th><th>" + basket[i].Quantity + "</th><th>" + basket[i].Total + "</th></tr>");
+                        $("#ItemToRemove").append("<option>" + basket[i].Code + "</option>");
+                        $("#BasketHidden").append('<input type="text" id="Items[' + i + '].Code" name="Items[' + i + '].Code" value="' + basket[i].Code + '" /><input type="text" id="Items[' + i + '].Description" name="Items[' + i + '].Description" value="' + basket[i].Description + '" /><input type="text" id="Items[' + i + '].Quantity" name="Items[' + i + '].Quantity" value="' + basket[i].Quantity + '" /><input type="text" id="Items[' + i + '].Total" name="Items[' + i + '].Total" value="' + basket[i].Total + '" /> </br>');
+                        combinedTotal += parseFloat(basket[i].Total);
+                    }
+                    combinedTotal = combinedTotal.toFixed(2);
+                    $("#PlaceOrder").prop("disabled", false);
+                    $("#ClearBasket").prop("disabled", false);
+                    $("#TotalLabel").prop("hidden", false);
+                    $("#Total").html("£" + combinedTotal);
+                }
+                else {
+                    $("#ItemToRemove").prop("disabled", true);
+                    $("#NumberToRemove").empty();
+                    $("#NumberToRemove").prop("disabled", true);
+                    $("#Remove").prop("disabled", true);
+                    $("#PlaceOrder").prop("disabled", true);
+                    $("#ClearBasket").prop("disabled", true);
+                    $("#TotalLabel").prop("hidden", true);
+                    $("#Total").html(" ");
+                }
+            }
+            $(".StockSelection").change(function () {
+                if ($("#StockCode").prop("selectedIndex") == 0 || $("#Quantity").val() < 1) {
+                    $("#AddToBasket").prop("disabled", true);
+                }
+                else {
+                    $("#AddToBasket").prop("disabled", false);
+                }
+            });
+            $("#StockCode").change(function () {
+                if ($("#StockCode").val() == "") {
+                    $("#Image").prop("hidden", true);
+                    $("#Description").html("");
+                    $("#PricePerUnit").html("");
+                }
+                else {
+                    $.ajax({
+                        type: "POST",
+                        url: "/User/GetDetails",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({ stockCode: $("#StockCode").val() }),
+                        dataType: "json",
+                        success: function (item, status, xhr) {
+                            $("#Image").prop("hidden", false);
+                            $("#Image").prop("src", "/Images/" + $("#StockCode").val() + ".jpg");
+                            $("#Description").html(item.Description);
+                            $("#PricePerUnit").html("£" + item.PricePerUnit);
+                            description = item.Description;
+                            price = item.PricePerUnit;
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                        }
+                    });
+                }
+            });
+            $("#AddToBasket").click(function () {
+                if (numberOfItems == 0) {
+                    numberOfItems++;
+                    basket.push({ Code: $("#StockCode").val(), Description: description, Quantity: $("#Quantity").val(), Cost: price, Total: price * $("#Quantity").val() });
+                    basket[numberOfItems - 1].Total = basket[numberOfItems - 1].Total.toFixed(2);
+                    basketUpdate();
+                }
+                else {
+                    var found = false;
+                    var counter = 0;
+                    do {
+                        if (basket[counter].Code == $("#StockCode").val()) {
+                            found = true;
+                        }
+                        else {
+                            counter++;
+                        }
+                    } while (counter <= numberOfItems - 1 && found == false)
+                    if (found == true) {
+                        basket[counter].Quantity += parseInt($("#Quantity").val());
+                        basket[counter].Total = basket[counter].Quantity * basket[counter].Cost;
+                        basket[counter].Total = basket[counter].Total.toFixed(2);
+                        basketUpdate();
+                    }
+                    else {
+                        numberOfItems++;
+                        basket.push({ Code: $("#StockCode").val(), Description: description, Quantity: $("#Quantity").val(), Cost: price, Total: price * $("#Quantity").val() });
+                        basket[numberOfItems - 1].Total = basket[numberOfItems - 1].Total.toFixed(2);
+                        basketUpdate();
+                    }
+                }
+                $("#StockCode").prop("selectedIndex", 0);
+                $("#Quantity").val("");
+                $("#Image").prop("hidden", true);
+                $("#Description").html("");
+                $("#PricePerUnit").html("");
+                $("#AddToBasket").prop("disabled", true);
+            });
+            $("#ItemToRemove").change(function () {
+                $("#NumberToRemove").empty();
+                if ($("#ItemToRemove").prop("selectedIndex") == 0) {
+                    $("#NumberToRemove").prop("disabled", true);
+                    $("#Remove").prop("disabled", true);
+                }
+                else {
+                    $("#NumberToRemove").prop("disabled", false);
+                    $("#NumberToRemove").append("<option> </option>");
+                    if (basket[$("#ItemToRemove").prop("selectedIndex") - 1].Quantity > 1) {
+                        for (var i = 1; i < basket[$("#ItemToRemove").prop("selectedIndex") - 1].Quantity; i++) {
+                            $("#NumberToRemove").append("<option>" + i + "</option>");
+                        }
+                    }
+                    $("#NumberToRemove").append("<option>All</option>");
+                }
+            });
+            $("#NumberToRemove").change(function () {
+                if ($("#NumberToRemove").prop("selectedIndex") == 0) {
+                    $("#Remove").prop("disabled", true);
+                }
+                else {
+                    $("#Remove").prop("disabled", false);
+                }
+            });
+            $("#Remove").click(function () {
+                if ($("#NumberToRemove").val() == "All") {
+                    if (numberOfItems > 1 && $("#ItemToRemove").prop("selectedIndex") < numberOfItems) {
+                        for (var i = $("#ItemToRemove").prop("selectedIndex") - 1; i < numberOfItems - 1; i++) {
+                            basket[i].Code = basket[i + 1].Code;
+                            basket[i].Description = basket[i + 1].Description;
+                            basket[i].Quantity = basket[i + 1].Quantity;
+                            basket[i].Cost = basket[i + 1].Cost;
+                            basket[i].Total = basket[i + 1].Total;
+                        }
+                    }
+                    basket.pop();
+                    numberOfItems--;
+                }
+                else {
+                    basket[$("#ItemToRemove").prop("selectedIndex") - 1].Quantity -= parseInt($("#NumberToRemove").val());
+                    basket[$("#ItemToRemove").prop("selectedIndex") - 1].Total = basket[$("#ItemToRemove").prop("selectedIndex") - 1].Quantity * basket[$("#ItemToRemove").prop("selectedIndex") - 1].Cost;
+                    basket[$("#ItemToRemove").prop("selectedIndex") - 1].Total = basket[$("#ItemToRemove").prop("selectedIndex") - 1].Total.toFixed(2);
+                }
+                $("#ItemToRemove").prop("selectedIndex", 0);
+                $("#NumberToRemove").prop("selectedIndex", 0);
+                $("#NumberToRemove").prop("disabled", true);
+                $("#Remove").prop("disabled", true);
+                basketUpdate();
+            });
+            $("#ClearBasket").click(function () {
+                for (var i = 0; i < numberOfItems; i++) {
+                    basket.pop();
+                }
+                numberOfItems = 0;
+                basketUpdate();
+            });
+            $("#flip").click(function () {
+                $("#panel").slideToggle("slow");
+            });
+            });
+    </script>
+</head>
+<div id="header">
+    <h1>Cards 101</h1>
+</div>
+<div id="side">
+    @Html.ActionLink("Home", "Customer", "User")<br />
+    Place an order <br />
+    @Html.ActionLink("Check your orders", "CheckOrders", "User") <br />
+    @Html.ActionLink("Edit your details", "EditDetails", "User")
+</div>
+<div id="main">
+    @using (Html.BeginForm("Order", "User", FormMethod.Post))
+    {
+    <fieldset>
+        @Html.DropDownList("StockCode", ViewData["StockCodes"] as SelectList, new { @class = "StockSelection", }) <br />
+        <img id="Image" name="Image" hidden="hidden" style="width:auto; height:150px" /> <br />
+        <b>Description:</b> @Html.Label("Description", " ", new { @id = "Description" }) <br />
+        <b>Price per unit:</b> @Html.Label("PricePerUnit", " ", new { @id = "PricePerUnit" }) <br />
+        Quantity: <input type="number" id="Quantity" name="Quantity" class="StockSelection" /><br />
+        <input type="button" id="AddToBasket" value="Add to Basket" disabled="disabled" /> <br />
+        <div id="flip">Show/hide basket</div>
+        <div id="panel">
+            <table id="Basket"></table>
+        </div>
+        <b>@Html.Label("TotalLabel", "Order Total:", new { @id = "TotalLabel", })</b> @Html.Label("Total", " ", new { @id = "Total" }) <br />
+        Remove Items <br />
+        @Html.DropDownList("ItemToRemove", new SelectList(" "))
+        @Html.DropDownList("NumberToRemove", new SelectList(" "))
+        <input type="button" id="Remove" value="Remove" disabled="disabled" /><br />
+        <input type="button" id="ClearBasket" value="Clear Basket" disabled="disabled" /><br />
+        <div id="BasketHidden" hidden="hidden">
+
+        </div>
+        <input type="submit" id="PlaceOrder" value="Place Order" disabled="disabled" />
+    </fieldset>
+    }
+    @{ Html.EndForm(); }
+</div>

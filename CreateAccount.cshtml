@@ -1,0 +1,127 @@
+﻿@model WebApplication4.Models.Customer
+@{
+    ViewBag.Title = "Cards 101";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <script>
+        $(document).ready(function () {
+            var allFields = false;
+            var emailOK = false;
+            var passwordOK = false;
+            var contactNumberOK = false;
+            var postcodeOK = false;
+            $("#Email").prop("type", "email");
+            function submitCheck () {
+                if (allFields == true && emailOK == true && passwordOK == true && contactNumberOK == true && postcodeOK == true) {
+                    console.log("Y");
+                    $("#submit").prop("disabled", false);
+                }
+                else {
+                    console.log("X");
+                    $("#submit").prop("disabled", true);
+                }
+            }
+            $("input").keyup(function () {
+                if ($("#FirstName").val() == "" || $("#Surname").val() == "" || $("#Password").val() == "" || $("#Email").val() == "" || $("#ContactNumber").val() == "" || $("#Address1").val() == "" || $("#TownCity").val() == "" || $("#County").val() == "" || $("#Postcode").val() == "") {
+                    allFields = false;
+                }
+                else {
+                    allFields = true;
+                }
+                if ($(this).prop("id") != "Email" && $(this).prop("id") != "Password" && $(this).prop("id") != "ContactNumber" && $(this).prop("id") != "Postcode") {
+                    console.log("Z");
+                    submitCheck();
+                }
+            });
+            $("#Email").keyup(function () {
+                emailOK = false;
+                submitCheck();
+                if ($("#Email").val().match(/^((([!#$%&'*+\-/=?^_`{|}~\w])|([!#$%&'*+\-/=?^_`{|}~\w][!#$%&'*+\-/=?^_`{|}~\.\w]{0,}[!#$%&'*+\-/=?^_`{|}~\w]))[@Html.Raw("@")]\w+([-.]\w+)*\.\w+([-.]\w+)*)$/) == null) {
+                    $("#AlreadyInUse").html(" ");
+                }
+                else {
+                    $.ajax({
+                        type: "POST",
+                        url: "/User/EmailCheck",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({ check: $("#Email").val() }),
+                        dataType: "json",
+                        success: function (result, status, xhr) {
+                            if (result.free == true) {
+                                emailOK = true;
+                                submitCheck();
+                                $("#AlreadyInUse").html(" ");
+                            }
+                            else {
+                                $("#AlreadyInUse").html("That email address is already in use.");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                        }
+                    });
+                }
+            });
+            $("#Password").keyup(function () {
+                if ($("#Password").val().match(/((?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*\W).{8,})/) != null) {
+                    passwordOK = true;
+                }
+                else {
+                    passwordOK = false;
+                }
+                submitCheck();
+            });
+            $("#ContactNumber").keyup(function () {
+                if ($("#ContactNumber").val().match(/0[0-9]{10}/) != null) {
+                    contactNumberOK = true;
+                }
+                else {
+                    contactNumberOK = false;
+                }
+                submitCheck();
+            });
+            $("#Postcode").keyup(function () {
+                if ($("#Postcode").val().match(/[A-Z]{1,2}[0-9]{1,2} {1}[0-9]{1}[A-Z]{2}/) != null) {
+                    postcodeOK = true;
+                }
+                else {
+                    postcodeOK = false;
+                }
+                submitCheck();
+            });
+        });
+    </script>
+</head>
+<div id="header">
+    <h1>Cards 101</h1>
+</div>
+<div id="side">
+    @Html.ActionLink("Home", "Index", "Home")<br />
+    New User<br>
+    @Html.ActionLink("Existing User", "Login", "User") <br />
+    @Html.ActionLink("Admin", "AdminLogin", "Admin")
+</div>
+<div id="main">
+    @using (Html.BeginForm("CreateAccount", "User", FormMethod.Post))
+    {
+    <fieldset>
+        You must enter something for all fields except Address Line 2. <br />
+        Password must be at least 8 characters long and contain an uppercase letter, a lowercase letter, a number, and a non-alphanumeric character. <br />
+        <b>First Name</b> @Html.EditorFor(u => u.FirstName)<br />
+        <b>Surname</b> @Html.EditorFor(u => u.Surname)<br />
+        <b>Password</b> @Html.PasswordFor(u => u.Password)<br />
+        <b>Contact Number</b> @Html.EditorFor(u => u.ContactNumber)<br />
+        <b>Email</b> @Html.EditorFor(u => u.Email) @Html.Label("AlreadyInUse", " ", new { @id = "AlreadyInUse" })<br />
+        <b>Address Line 1</b> @Html.EditorFor(u => u.Address1)<br />
+        <b>Address Line 2</b> @Html.EditorFor(u => u.Address2)<br />
+        <b>Town/City</b> @Html.EditorFor(u => u.TownCity)<br />
+        <b>County</b> @Html.EditorFor(u => u.County)<br />
+        <b>Postcode</b> @Html.EditorFor(u => u.Postcode)<br />
+        <input type="submit" id="submit" name="submit" value="Submit" disabled="disabled" />
+    </fieldset>
+    }
+    @{ Html.EndForm();}
+    @Html.Encode(ViewData["Message"])
+</div>
+

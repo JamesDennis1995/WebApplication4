@@ -1,0 +1,118 @@
+﻿@model  WebApplication4.Models.Stock
+@{
+    ViewBag.Title = "Cards 101";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <script>
+        $(document).ready(function () {
+            var allFields = false;
+            var stockCodeOK = false;
+            var fileUploaded = false;
+            function submitCheck() {
+                if (allFields == true && stockCodeOK == true && fileUploaded == true) {
+                    console.log("Y");
+                    $("#submit").prop("disabled", false);
+                }
+                else {
+                    console.log("X");
+                    $("#submit").prop("disabled", true);
+                }
+            }
+            function readURL(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $("#preview").prop("src", e.target.result);
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+            $("input").keyup(function () {
+                if ($("#Code").val() != "" && $("#Description").val() != "" && $("#PricePerUnit").val() != "") {
+                    allFields = true;
+                }
+                else {
+                    allFields = false;
+                }
+                if ($(this).prop("id") != "Code") {
+                    submitCheck();
+                }
+            });
+            $("#Code").keyup(function () {
+                stockCodeOK = false;
+                submitCheck();
+                if ($("#Code").val().match(/[A-Z][A-Z][A-Z0-9][A-Z][A-Z][A-Z0-9]/) == null) {
+                    $("#AlreadyInUse").html(" ");
+                }
+                else {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Admin/StockCodeCheck",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({ check: $("#Code").val() }),
+                        dataType: "json",
+                        success: function (result, status, xhr) {
+                            if (result.free == true) {
+                                stockCodeOK = true;
+                                submitCheck();
+                                $("#AlreadyInUse").html(" ");
+                            }
+                            else {
+                                $("#AlreadyInUse").html("That stock code is already in use.");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                        }
+                    });
+                }
+            });
+            $("#image").change(function () {
+                if ($(this).val() != "") {
+                    var ext = $(this).val().match(/\.(.+)$/)[1];
+                    if (ext == "jpg") {
+                        $("#preview").prop("hidden", false);
+                        readURL(this);
+                        fileUploaded = true;
+                        submitCheck();
+                    }
+                    else {
+                        $("#preview").prop("hidden", true);
+                        fileUploaded = false;
+                        submitCheck();
+                    }
+                }
+                else {
+                    $("#preview").prop("hidden", true);
+                    fileUploaded = false;
+                    submitCheck();
+                }
+            });
+        });
+    </script>
+</head>
+<div id="header">
+    <h1>Cards 101</h1>
+</div>
+<div id="side">
+    @Html.ActionLink("Home", "Admin", "Admin") <br />
+    Add stock<br />
+    @Html.ActionLink("Check orders", "CheckOrders", "Admin") <br />
+    @Html.ActionLink("Change password", "ChangeAdminPassword", "Admin")
+</div>
+<div id="main">
+    @using (Html.BeginForm("AddStock", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+    <fieldset>
+        <b>Stock Code</b> @Html.EditorFor(u => u.Code)@Html.Label("AlreadyInUse", " ", new { @id = "AlreadyInUse" }) <br />
+        <b>Description</b> @Html.EditorFor(u => u.Description) <br />
+        <b>Price per Unit</b> @Html.EditorFor(u => u.PricePerUnit)<br />
+        <b>Upload image</b> <input type="file" id="image" name="image" /><br />
+        <img id="preview" src="" hidden="hidden" style="width:auto; height:150px" /> <br />
+        <input type="submit" value="submit" disabled="disabled" />
+    </fieldset>
+    }
+    @{ Html.EndForm();}
+    @Html.Encode(ViewData["Message"])
+</div>

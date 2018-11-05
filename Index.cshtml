@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "Cards 101";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="header">
+    <h1>Cards 101</h1>
+</div>
+<div id="side">
+    Home <br />
+    @Html.ActionLink("New User", "CreateAccount", "User") <br>
+    @Html.ActionLink("Existing User", "Login", "User") <br>
+    @Html.ActionLink("Admin", "AdminLogin", "Admin")
+</div>
+<div id="main">
+    Welcome to Cards 101.
+</div>

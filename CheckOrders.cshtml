@@ -1,0 +1,52 @@
+﻿@{
+    ViewBag.Title = "Cards 101";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <script>
+        $(document).ready(function () {
+            $("#OrderNumber").change(function () {
+                $("#Items").empty();
+                $("#TotalLabel").prop("hidden", true);
+                $("#Total").html(" ");
+                if ($("#OrderNumber").val() == "") {
+                    
+                }
+                else {
+                    $.ajax({
+                        type: "POST",
+                        url: "/User/GetOrderInfo",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({ orderNumber: $("#OrderNumber").val() }),
+                        dataType: "json",
+                        success: function (details, status, xhr) {
+                            $("#TotalLabel").prop("hidden", false);
+                            $("#Items").append("<tr><th>Image</th><th>Stock Code</th><th>Description</th><th>Quantity</th></tr>");
+                            for (var i = 0; i < details.length; i++) {
+                                $("#Items").append("<tr><th><img src='/Images/" + details[i].Code + ".jpg' style='width: auto; height: 75px' /></th><th>" + details[i].Code + "</th><th>" + details[i].Description + "</th><th>" + details[i].Quantity + "</th></tr>");
+                            }
+                            $("#Total").html("£" + details[0].Total);
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<div id="header">
+    <h1>Cards 101</h1>
+</div>
+<div id="side">
+    @Html.ActionLink("Home", "Customer", "User")<br />
+    @Html.ActionLink("Place an order", "Order", "User") <br />
+    Check your orders <br />
+    @Html.ActionLink("Edit your details", "EditDetails", "User")
+</div>
+<div id="main">
+    @Html.DropDownList("OrderNumber", ViewData["OrderNumbers"] as SelectList) <br />
+    <table id="Items"></table> <br />
+    <b>@Html.Label("TotalLabel", "Order Total:", new { @id = "TotalLabel", @hidden = "true" })</b> @Html.Label("Total", " ", new { @id = "Total" })
+</div>

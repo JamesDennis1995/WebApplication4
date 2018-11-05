@@ -1,0 +1,25 @@
+﻿@model WebApplication4.Models.AdminPassword
+@{
+    ViewBag.Title = "Cards 101";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="header">
+    <h1>Cards 101</h1>
+</div>
+<div id="side">
+    @Html.ActionLink("Home", "Index", "Home")<br />
+    @Html.ActionLink("New User", "CreateAccount", "User")<br />
+    @Html.ActionLink("Existing User", "Login", "User") <br />
+    Admin
+</div>
+<div id="main">
+    @using (Html.BeginForm("AdminLogin", "Admin", FormMethod.Post))
+    {
+    <fieldset>
+        <b>Password</b> @Html.PasswordFor(u => u.AdminPassword1) <br />
+        <input type="submit" value="Submit" />
+    </fieldset>
+    }
+    @{ Html.EndForm();}
+    @Html.Encode(ViewData["Message"])
+</div>

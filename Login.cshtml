@@ -1,0 +1,34 @@
+﻿@model WebApplication4.Models.Customer
+@{
+    ViewBag.Title = "Cards 101";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <script>
+        $(document).ready(function () {
+            $("#Email").prop("type", "email");
+        });
+    </script>
+</head>
+<div id="header">
+    <h1>Cards 101</h1>
+</div>
+<div id="side">
+    @Html.ActionLink("Home", "Index", "Home")<br />
+    @Html.ActionLink("New User", "CreateAccount", "User")<br />
+    Existing User<br />
+    @Html.ActionLink("Admin", "AdminLogin", "Admin")
+</div>
+<div id="main">
+    @using (Html.BeginForm("Login", "User", FormMethod.Post))
+    {
+    <fieldset>
+        <b>Email</b> @Html.EditorFor(u => u.Email) <br />
+        <b>Password</b> @Html.PasswordFor(u => u.Password) <br />
+        <input type="submit" value="Submit" />
+    </fieldset>
+    }
+    @{ Html.EndForm();}
+    @Html.Encode(ViewData["Message"])
+</div>
+
