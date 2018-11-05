@@ -1,0 +1,72 @@
+﻿@{
+                ViewBag.Title = "Cards 101";
+                Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <script>
+        $(document).ready(function () {
+            $("#OrderNumber").change(function () {
+                $("#Items").empty();
+                $("#TotalLabel").prop("hidden", true);
+                $("#NameLabel").prop("hidden", true);
+                $("#AddressLabel").prop("hidden", true);
+                $("#NumberLabel").prop("hidden", true);
+                $("#Total").html(" ");
+                $("#Name").html(" ");
+                $("#Address").html(" ");
+                $("#Number").html(" ");
+                if ($("#OrderNumber").val() == "") {
+
+                }
+                else {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Admin/GetOrderInfo",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({ orderNumber: $("#OrderNumber").val() }),
+                        dataType: "json",
+                        success: function (details, status, xhr) {
+                            $("#NameLabel").prop("hidden", false);
+                            $("#AddressLabel").prop("hidden", false);
+                            $("#NumberLabel").prop("hidden", false);
+                            $("#TotalLabel").prop("hidden", false);
+                            $("#Items").append("<tr><th>Image</th><th>Stock Code</th><th>Description</th><th>Quantity</th></tr>");
+                            for (var i = 0; i < details.length; i++) {
+                                $("#Items").append("<tr><th><img src='/Images/" + details[i].Code + ".jpg' style='width: auto; height: 75px' /></th><th>" + details[i].Code + "</th><th>" + details[i].Description + "</th><th>" + details[i].Quantity + "</th></tr>");
+                            }
+                            $("#Total").html("£" + details[0].Total);
+                            $("#Name").html(details[0].FirstName + " " + details[0].Surname);
+                            if (details[0].Address2 != null) {
+                                $("#Address").html(details[0].Address1 + ", " + details[0].Address2 + ", " + details[0].TownCity + ", " + details[0].County + ", " + details[0].Postcode);
+                            }
+                            else {
+                                $("#Address").html(details[0].Address1 + ", " + details[0].TownCity + ", " + details[0].County + ", " + details[0].Postcode);
+                            }
+                            $("#Number").html(details[0].ContactNumber);
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<div id="header">
+    <h1>Cards 101</h1>
+</div>
+<div id="side">
+    @Html.ActionLink("Home", "Admin", "Admin") <br />
+    @Html.ActionLink("Add stock", "AddStock", "Admin") <br />
+    Check orders <br />
+    @Html.ActionLink("Change password", "ChangeAdminPassword", "Admin")
+</div>
+<div id="main">
+    @Html.DropDownList("OrderNumber", ViewData["OrderNumbers"] as SelectList) <br />
+    <b>@Html.Label("NameLabel", "Placed by:", new { @id = "NameLabel", @hidden = "true" })</b> @Html.Label("Name", " ", new { @id = "Name" }) <br />
+    <b>@Html.Label("AddressLabel", "Address:", new { @id = "AddressLabel", @hidden = "true" })</b> @Html.Label("Address", " ", new { @id = "Address" }) <br />
+    <b>@Html.Label("NumberLabel", "Contact Number:", new { @id = "NumberLabel", @hidden = "true" })</b> @Html.Label("Number", " ", new { @id = "Number" })
+    <table id="Items"></table> <br />
+    <b>@Html.Label("TotalLabel", "Order Total:", new { @id = "TotalLabel", @hidden = "true" })</b> @Html.Label("Total", " ", new { @id = "Total" })
+</div>
