@@ -19,6 +19,7 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public JsonResult EmailCheck(string check)
         {
+            //Checks if the input email address matches any currently in use. If it does, return false. Otherwise, return true.
             var db = new JamesEntities();
             var duplicateCheck = db.Customer.Where(u => u.Email == check).FirstOrDefault();
             if (duplicateCheck == null)
@@ -35,6 +36,7 @@ namespace WebApplication4.Controllers
         {
             if (ModelState.IsValid)
             {
+                //Creates a new record in the database, saves changes, and redirects to the starting page.
                 var db = new JamesEntities();
                 db.Customer.Add(new Customer
                 {
@@ -64,6 +66,7 @@ namespace WebApplication4.Controllers
         {
             if (ModelState.IsValid)
             {
+                //If the input email address does not match any in the database, generate an error message. Otherwise, proceed.
                 var db = new JamesEntities();
                 var password = model.Password;
                 var check = db.Customer.Where(u => u.Email == model.Email).FirstOrDefault();
@@ -73,6 +76,7 @@ namespace WebApplication4.Controllers
                 }
                 else
                 {
+                    //Check if the input password matches the one for the selected record. If it does, proceed. If not, generate an error message.
                     bool correct = Salt.Verify(password, check.Password);
                     if (correct == true)
                     {
@@ -92,6 +96,7 @@ namespace WebApplication4.Controllers
         [HttpGet]
         public ActionResult Customer()
         {
+            //If a login session is set, do nothing. If it is not, return to the user login page.
             if (Session["Email"] != null)
             {
                 return View();
@@ -104,12 +109,14 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public ActionResult Logout()
         {
+            //Terminate the active session and return to the user login page.
             Session.Abandon();
             return RedirectToAction("Login", "User");
         }
         [HttpGet]
         public ActionResult EditDetails()
         {
+            //If a login session is set, do nothing. If it is not, return to the user login page.
             if (Session["Email"] != null)
             {
                 return View();
@@ -124,6 +131,7 @@ namespace WebApplication4.Controllers
         {
             if (ModelState.IsValid)
             {
+                //Update the logged-in user's record with all fields that have been updated, update the session message, and return to the user home page.
                 var db = new JamesEntities();
                 var search = Session["Email"];
                 var toUpdate = db.Customer.Where(u => u.Email == search).FirstOrDefault();
@@ -177,6 +185,7 @@ namespace WebApplication4.Controllers
         [HttpGet]
         public ActionResult Order()
         {
+            //If a login session is set, return a list of all stock codes from the database. If it is not, return to the user login page.
             if (Session["Email"] != null)
             {
                 var db = new JamesEntities();
@@ -199,6 +208,7 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public JsonResult GetDetails(string stockCode)
         {
+                //Return the description and price per unit for the selected stock item.
                 var db = new JamesEntities();
                 var item = db.Stock.Select(u => new { u.Code, u.Description, u.PricePerUnit }).Where(v => v.Code == stockCode).FirstOrDefault();
                 return Json(item, JsonRequestBehavior.AllowGet);
@@ -208,6 +218,7 @@ namespace WebApplication4.Controllers
         {
             if (ModelState.IsValid)
             {
+                //Update all relevant tables and the session message, and return to the User home page.
                 var db = new JamesEntities();
                 var numberOfItems = Items.Count;
                 var orderNumber = db.Order.ToList().Count + 1;
@@ -243,6 +254,7 @@ namespace WebApplication4.Controllers
         [HttpGet]
         public ActionResult CheckOrders()
         {
+            //If a login session is set, return a list of all numbers for orders placed by the logged-in user. If it is not, return to the user login page.
             if (Session["Email"] != null)
             {
                 var db = new JamesEntities();
@@ -268,6 +280,7 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public JsonResult GetOrderInfo (string orderNumber)
         {
+            //Return the total value of the order selected, and all items ordered.
             var orderNumber2 = int.Parse(orderNumber);
             var db = new JamesEntities();
             var details = db.OrderStock.Join(db.Order, os => os.OrderID, o => o.Id, (os, o) => new { os, o }).Join(db.Stock, oso => oso.os.StockCode, s => s.Code, (oso, s) => new { Id = oso.os.OrderID, oso.os.Quantity, s.Code, s.Description, Total = oso.o.OrderTotal}).Where(u => u.Id == orderNumber2).ToList();
