@@ -10,6 +10,7 @@
             var stockCodeOK = false;
             var fileUploaded = false;
             function submitCheck() {
+                //Checks a series of flags. If all are true, enables the Submit button. Otherwise, disables it.
                 if (allFields == true && stockCodeOK == true && fileUploaded == true) {
                     console.log("Y");
                     $("#submit").prop("disabled", false);
@@ -20,6 +21,7 @@
                 }
             }
             function readURL(input) {
+                //Generates a URL for the uploaded image and displays it.
                 if (input.files && input.files[0]) {
                     var reader = new FileReader();
                     reader.onload = function (e) {
@@ -29,6 +31,7 @@
                 }
             }
             $("input").keyup(function () {
+                //Checks if there is something input for all fields, adjusts the relevant flag accordingly, and calls the check that enables or disables the Submit button.
                 if ($("#Code").val() != "" && $("#Description").val() != "" && $("#PricePerUnit").val() != "") {
                     allFields = true;
                 }
@@ -40,6 +43,7 @@
                 }
             });
             $("#Code").keyup(function () {
+                //Checks the input stock code against the database in real time as the user types, and adjusts the relevant flag based on whether a match is found or not. If it is, generates an error message.
                 stockCodeOK = false;
                 submitCheck();
                 if ($("#Code").val().match(/[A-Z][A-Z][A-Z0-9][A-Z][A-Z][A-Z0-9]/) == null) {
@@ -69,6 +73,7 @@
                 }
             });
             $("#image").change(function () {
+                //If an image has been uploaded and its file type is JPG, displays it and calls the check that enables or disables the Submit button.
                 if ($(this).val() != "") {
                     var ext = $(this).val().match(/\.(.+)$/)[1];
                     if (ext == "jpg") {
