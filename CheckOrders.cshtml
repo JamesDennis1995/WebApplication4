@@ -5,6 +5,7 @@
 <head>
     <script>
         $(document).ready(function () {
+            //Clears the page. If no number has been selected, leave it blank. Otherwise, obtain all relevant information from the database and display it.
             $("#OrderNumber").change(function () {
                 $("#Items").empty();
                 $("#TotalLabel").prop("hidden", true);
