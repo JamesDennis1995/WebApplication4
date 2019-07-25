@@ -13,6 +13,7 @@
             var postcodeOK = false;
             $("#Email").prop("type", "email");
             function submitCheck () {
+                //Checks a series of flags. If all are true, enables the Submit button. Otherwise, disables it.
                 if (allFields == true && emailOK == true && passwordOK == true && contactNumberOK == true && postcodeOK == true) {
                     console.log("Y");
                     $("#submit").prop("disabled", false);
@@ -23,6 +24,7 @@
                 }
             }
             $("input").keyup(function () {
+                //Checks if there is something input for all fields, adjusts the relevant flag accordingly, and calls the check that enables or disables the Submit button.
                 if ($("#FirstName").val() == "" || $("#Surname").val() == "" || $("#Password").val() == "" || $("#Email").val() == "" || $("#ContactNumber").val() == "" || $("#Address1").val() == "" || $("#TownCity").val() == "" || $("#County").val() == "" || $("#Postcode").val() == "") {
                     allFields = false;
                 }
@@ -35,6 +37,7 @@
                 }
             });
             $("#Email").keyup(function () {
+                //Checks the input email using a regular expression. If it matches, check it against the database for duplicates. If none are found, set the relevant flag to true. Otherwise, generate an error message and call the check that enables or disables the Submit button.
                 emailOK = false;
                 submitCheck();
                 if ($("#Email").val().match(/^((([!#$%&'*+\-/=?^_`{|}~\w])|([!#$%&'*+\-/=?^_`{|}~\w][!#$%&'*+\-/=?^_`{|}~\.\w]{0,}[!#$%&'*+\-/=?^_`{|}~\w]))[@Html.Raw("@")]\w+([-.]\w+)*\.\w+([-.]\w+)*)$/) == null) {
@@ -64,6 +67,7 @@
                 }
             });
             $("#Password").keyup(function () {
+                //Checks the input password using a regular expression, adjusts the relevant flag accordingly, and calls the check that enables or disables the Submit button.
                 if ($("#Password").val().match(/((?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*\W).{8,})/) != null) {
                     passwordOK = true;
                 }
@@ -73,6 +77,7 @@
                 submitCheck();
             });
             $("#ContactNumber").keyup(function () {
+                //Checks the input contact number using a regular expression, adjusts the relevant flag accordingly, and calls the check that enables or disables the Submit button.
                 if ($("#ContactNumber").val().match(/0[0-9]{10}/) != null) {
                     contactNumberOK = true;
                 }
@@ -82,6 +87,7 @@
                 submitCheck();
             });
             $("#Postcode").keyup(function () {
+                //Checks the input postcode using a regular expression, adjusts the relevant flag accordingly, and calls the check that enables or disables the Submit button.
                 if ($("#Postcode").val().match(/[A-Z]{1,2}[0-9]{1,2} {1}[0-9]{1}[A-Z]{2}/) != null) {
                     postcodeOK = true;
                 }
