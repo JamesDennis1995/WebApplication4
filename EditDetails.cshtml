@@ -13,6 +13,7 @@
             var postcodeOK = true;
             $("#Email").prop("type", "email");
             function submitCheck() {
+                //Checks a series of flags. If all are true, enables the Submit button. Otherwise, disables it.
                 if (atLeastOneField == true && emailOK == true && passwordOK == true && contactNumberOK == true && postcodeOK == true) {
                     console.log("X");
                     $("#submit").prop("disabled", false);
@@ -23,6 +24,7 @@
                 }
             }
             $("input").keyup(function () {
+                //Checks if there is something input for at least one field, adjusts the relevant flag accordingly, and calls the check that enables or disables the Submit button.
                 if ($("#FirstName").val() == "" && $("#Surname").val() == "" && $("#Password").val() == "" && $("#Email").val() == "" && $("#ContactNumber").val() == "" && $("#Address1").val() == "" && $("#Address2").val() == "" && $("#Blank").prop("checked") == false && $("#TownCity").val() == "" && $("#County").val() == "" && $("#Postcode").val() == "") {
                     atLeastOneField = false;
                 }
@@ -34,6 +36,7 @@
                 }
             });
             $("#Address2").keyup(function () {
+                //Checks if there is something entered. If there is, unchecks and disables the Leave Blank checkbox.
                 if ($(this).val() == "") {
                     $("#Blank").prop("disabled", false);
                 }
@@ -54,6 +57,7 @@
                         $("#AlreadyInUse").html(" ");
                     }
                     else {
+                        //Checks the input email using a regular expression. If it matches, check it against the database for duplicates. If none are found, set the relevant flag to true. Otherwise, generate an error message and call the check that enables or disables the Submit button.
                         $.ajax({
                             type: "POST",
                             url: "/User/EmailCheck",
@@ -78,6 +82,7 @@
                 }
             });
             $("#Password").keyup(function () {
+                //Checks the input password using a regular expression, adjusts the relevant flag accordingly, and calls the check that enables or disables the Submit button.
                 if ($("#Password").val().match(/((?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*\W).{8,})/) != null || $("#Password").val() == "") {
                     passwordOK = true;
                 }
@@ -91,6 +96,7 @@
                     contactNumberOK = true;
                 }
                 else {
+                    //Checks the input contact number using a regular expression, adjusts the relevant flag accordingly, and calls the check that enables or disables the Submit button.
                     if ($("#ContactNumber").val().match(/0[0-9]{10}/) != null) {
                         contactNumberOK = true;
                     }
@@ -105,6 +111,7 @@
                     postcodeOK = true;
                 }
                 else {
+                    //Checks the input postcode using a regular expression, adjusts the relevant flag accordingly, and calls the check that enables or disables the Submit button.
                     if ($("#Postcode").val().match(/[A-Z]{1,2}[0-9]{1,2} {1}[0-9]{1}[A-Z]{2}/) != null) {
                         postcodeOK = true;
                     }
