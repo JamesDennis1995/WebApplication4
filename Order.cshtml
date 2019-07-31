@@ -16,6 +16,7 @@
             $("#NumberToRemove").prop("disabled", true);
             $("#TotalLabel").prop("hidden", true);
             function basketUpdate() {
+                //Clears all relevant divisions, and refills them based on the basket. Also enables or disables the relevant buttons based on if there is anything in the basket or not.
                 $("#ItemToRemove").empty();
                 $("#Basket").empty();
                 $("#BasketHidden").empty();
@@ -56,6 +57,7 @@
                 }
             });
             $("#StockCode").change(function () {
+                //If a stock code is selected, get the relevant stock item's information from the database using an AJAX function and display it.
                 if ($("#StockCode").val() == "") {
                     $("#Image").prop("hidden", true);
                     $("#Description").html("");
@@ -83,6 +85,7 @@
                 }
             });
             $("#AddToBasket").click(function () {
+                //If there are not any items in the basket, add the item selected. If there are, check if it is already in the basket. If it is, update the quantity and total cost for what is already there. If not, add the item.
                 if (numberOfItems == 0) {
                     numberOfItems++;
                     basket.push({ Code: $("#StockCode").val(), Description: description, Quantity: $("#Quantity").val(), Cost: price, Total: price * $("#Quantity").val() });
@@ -121,6 +124,7 @@
                 $("#AddToBasket").prop("disabled", true);
             });
             $("#ItemToRemove").change(function () {
+                //Update the Number To Remove dropdown menu based on the selected item, and how many of it the user has in their basket.
                 $("#NumberToRemove").empty();
                 if ($("#ItemToRemove").prop("selectedIndex") == 0) {
                     $("#NumberToRemove").prop("disabled", true);
@@ -137,7 +141,8 @@
                     $("#NumberToRemove").append("<option>All</option>");
                 }
             });
-            $("#NumberToRemove").change(function () {
+            $("#NumberToRemove").change(function ()
+                //If something is selected in the Number To Remove dropdown menu, enable the Remove button. If not, disable it.
                 if ($("#NumberToRemove").prop("selectedIndex") == 0) {
                     $("#Remove").prop("disabled", true);
                 }
@@ -146,6 +151,7 @@
                 }
             });
             $("#Remove").click(function () {
+                //If 'All' has been selected, remove the selected item. Otherwise, just update the quantity and total cost for the selected item.
                 if ($("#NumberToRemove").val() == "All") {
                     if (numberOfItems > 1 && $("#ItemToRemove").prop("selectedIndex") < numberOfItems) {
                         for (var i = $("#ItemToRemove").prop("selectedIndex") - 1; i < numberOfItems - 1; i++) {
@@ -171,6 +177,7 @@
                 basketUpdate();
             });
             $("#ClearBasket").click(function () {
+                //Remove all items from the basket.
                 for (var i = 0; i < numberOfItems; i++) {
                     basket.pop();
                 }
